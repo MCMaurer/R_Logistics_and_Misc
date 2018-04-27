@@ -1,15 +1,3 @@
-# .libPaths()[1]
-# instPackages <- list.files(.libPaths()[1])
-# ?install.packages
-# getwd()
-# library(nothing)
-# library(base)
-# library(stats)
-# install.packages(pkgs = instPackages, lib = "R_Packages")
-# 
-# .libPaths()[2]
-# .libPaths(new = "R_Packages")
-
 R.home()
 Sys.getenv("HOME")
 .libPaths()
@@ -22,17 +10,13 @@ file.exists(fname)
 file.exists("~/.Rprofile")
 
 
-# edit the R Profile
-user_rprofile = path.expand(file.path("~", ".Rprofile"))
-file.edit(user_rprofile)
-
+# edit the user R Profile
 file.edit("~/.Rprofile")
 
 # find the environment
 user_renviron = path.expand(file.path("~", ".Renviron"))
 file.edit(user_renviron)
 
-install.packages()
 
 
 #### how to update r and reinstall all packages ============================================================================
@@ -41,24 +25,35 @@ install.packages()
 user_renviron = path.expand(file.path("~", ".Renviron"))
 file.edit(user_renviron)
 
-# Restart R and then use libPaths to check and make sure you're good here.
+# Restart R and then use libPaths to check and make sure your new path appears
 .libPaths()
 
 # now, get the names of all the packages from the OLD .libPaths folder
-x <- installed.packages(lib.loc = "/Users/MJ/R_Packages_3.4")
+packages <- list.files("/Users/MJ/R_Packages_3.4")
 
-# extract the names of those packages
-packages <- x[,1]
-
-# reinstall all those packages in your new location, and they'll build with the new R installation
+# reinstall all those packages in your new location, and they'll build with the new R installation (this will take a while)
 install.packages(packages, .libPaths()[1])
 
 
+# check any packages that you don't have now, such as packages that you got from github
 
-# check any packages that you don't have now
-old_packages <- installed.packages(lib.loc = "/Users/MJ/R_Packages_3.4")[,1]
-new_packages <- installed.packages(lib.loc = "/Users/MJ/R_Packages_3.5")[,1]
+packages_compare <- function(old_path, new_path){
+  old_packages <- list.files(old_path)
+  new_packages <- list.files(new_path)
+  
+  in_both <- old_packages %in% new_packages
+  not_installed_now <- old_packages[!in_both]
+  return(not_installed_now)
+}
 
-in_both <- old_packages %in% packages
-not_installed_now <- old_packages[!in_both]
-not_installed_now
+still_need <- packages_compare("/Users/MJ/R_Packages_3.4", "/Users/MJ/R_Packages_3.5")
+still_need
+
+# the package githubinstall will find packages in github without the username and ask you if they're right, then install them
+library(githubinstall)
+
+githubinstall(still_need)
+
+# one last check to see if there are any you didn't get
+packages_compare("/Users/MJ/R_Packages_3.4", "/Users/MJ/R_Packages_3.5")
+
